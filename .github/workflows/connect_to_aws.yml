@@ -1,7 +1,6 @@
 name: Configure AWS Credentials
 jobs:
   configure_aws:
-    runs-on: ubuntu-latest
     steps:
       - uses: aws-actions/configure-aws-credentials@v1
         with:
