@@ -38,7 +38,7 @@ def preprocess_step(df):
         logger.info('START')
 
         # create dummies vars for categoricals
-        df_preprocess = pd.get_dummies(df_preprocess, columns =['capital-loss', 'education', 'relationship', 'age', 'native-country', 'workclass', 'capital-gain', 'marital-status', 'hours-per-week', 'fnlgt', 'education-num', 'occupation', 'sex', 'race'])
+        df_preprocess = pd.get_dummies(df_preprocess, columns =['education','marital-status','native-country','occupation','race','relationship','sex','workclass'])
         
         # standardize numericals
         df_preprocess[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']]=preprocessing.StandardScaler().fit_transform(df_preprocess[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']].values)
@@ -135,7 +135,7 @@ def data_slices_metrics(df,model):
 
         logger.info('START')
         
-        data_slice_list=['capital-loss', 'education', 'relationship', 'age', 'native-country', 'workclass', 'capital-gain', 'marital-status', 'hours-per-week', 'fnlgt', 'education-num', 'occupation', 'sex', 'race']
+        data_slice_list=['education','marital-status','native-country','occupation','race','relationship','sex','workclass']
 
 
         for col in data_slice_list:
