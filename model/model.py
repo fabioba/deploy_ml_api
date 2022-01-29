@@ -11,6 +11,8 @@ from sklearn.metrics import fbeta_score, precision_score, recall_score
 import logging
 import pickle 
 import os
+from sklearn import preprocessing
+
 
 FORMAT = '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=FORMAT,level=logging.INFO)
@@ -33,9 +35,11 @@ def preprocess_step(df):
     try:
         logger.info('START')
 
-        # create dummies vars
+        # create dummies vars for categoricals
         df_preprocess = pd.get_dummies(df, columns =['capital-loss', 'education', 'relationship', 'age', 'native-country', 'workclass', 'capital-gain', 'marital-status', 'hours-per-week', 'fnlgt', 'education-num', 'occupation', 'sex', 'race'])
         
+        # standardize numericals
+        df[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']]=preprocessing.StandardScaler().fit_transform(df[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']].values)
         # create X and Y
         X=df_preprocess.drop(['salary'],axis=1).values
         df_preprocess.loc[df_preprocess['salary']=='<=50K','salary']=0
@@ -75,7 +79,7 @@ def train_model(X_train, y_train):
     try:
         logger.info('START')
 
-        classifier = LogisticRegression(random_state=0)
+        classifier = LogisticRegression(random_state=0, solver='lbfgs',class_weight='balanced', max_iter=20)
         classifier.fit(X_train, y_train)
 
         logger.info('SUCCESS')
@@ -172,7 +176,7 @@ if __name__=='__main__':
     
     model=train_model(X_train,y_train)
 
-    store_model(model,'model.pkl','./model_trained')
+    store_model(model,'model.pkl','/model_trained')
 
 
 
