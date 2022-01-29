@@ -6,10 +6,11 @@ Date: 29th Jan, 2022
 """
 
 import pandas as pd
-import logging
+import logging 
 
-logger=logging.getLogger(__name__)
- 
+FORMAT = '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'
+logging.basicConfig(format=FORMAT,level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def prepare_column_name(df):
     """
@@ -66,6 +67,8 @@ def store_cleaned_df(df):
 
 
 if __name__=='__main__':
+
+    logger.info('MAIN')
 
     df=pd.read_csv('./data/census.csv')
 
