@@ -1,5 +1,51 @@
-from sklearn.metrics import fbeta_score, precision_score, recall_score
+"""
+This module contains model training and pre-processing steps.
 
+Author: Fabio
+Date: 29th of Jan, 2022
+"""
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import fbeta_score, precision_score, recall_score
+import logging
+
+
+def preprocess_step(df):
+    """
+    Preprocess steps includes getting dummies variables from categorical and split df into train and test set.
+
+    Args:
+        df(Pandas df)
+
+    Output:
+        x_train(array)
+        y_train(array)
+        x_test(array)
+        y_test(array)
+    """
+    try:
+        # create dummies vars
+        df_preprocess = pd.get_dummies(df, columns =['capital-loss', 'education', 'relationship', 'age', 'native-country', 'workclass', 'capital-gain', 'marital-status', 'hours-per-week', 'fnlgt', 'education-num', 'occupation', 'sex', 'race'])
+        
+        # create X and Y
+        X=df_preprocess.drop(['salary'],axis=1).values
+        df_preprocess.loc[df_preprocess['salary']=='<=50K','salary']=0
+        df_preprocess.loc[df_preprocess['salary']=='>50K','salary']=1
+        y=df_preprocess['salary'].values
+
+        # convert Y type
+        y=y.astype('int')
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+
+
+        return X_train, X_test, y_train, y_test 
+
+
+
+    except Exception as err:
+        logging.error(err)
 
 # Optional: implement hyperparameter tuning.
 def train_model(X_train, y_train):
