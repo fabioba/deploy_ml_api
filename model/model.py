@@ -25,6 +25,8 @@ def preprocess_step(df):
         y_test(array)
     """
     try:
+        logging.info('START')
+
         # create dummies vars
         df_preprocess = pd.get_dummies(df, columns =['capital-loss', 'education', 'relationship', 'age', 'native-country', 'workclass', 'capital-gain', 'marital-status', 'hours-per-week', 'fnlgt', 'education-num', 'occupation', 'sex', 'race'])
         
@@ -39,10 +41,10 @@ def preprocess_step(df):
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
+        logging.info('SUCCESS')
+
 
         return X_train, X_test, y_train, y_test 
-
-
 
     except Exception as err:
         logging.error(err)
@@ -64,7 +66,18 @@ def train_model(X_train, y_train):
         Trained machine learning model.
     """
 
-    pass
+    try:
+        logging.info('START')
+
+        classifier = LogisticRegression(random_state=0)
+        classifier.fit(X_train, y_train)
+
+        logging.info('SUCCESS')
+
+        return classifier
+
+    except Exception as err:
+        logging.error(err)
 
 
 def compute_model_metrics(y, preds):
@@ -83,10 +96,19 @@ def compute_model_metrics(y, preds):
     recall : float
     fbeta : float
     """
-    fbeta = fbeta_score(y, preds, beta=1, zero_division=1)
-    precision = precision_score(y, preds, zero_division=1)
-    recall = recall_score(y, preds, zero_division=1)
-    return precision, recall, fbeta
+    try:
+        logging.info('START')
+
+        fbeta = fbeta_score(y, preds, beta=1, zero_division=1)
+        precision = precision_score(y, preds, zero_division=1)
+        recall = recall_score(y, preds, zero_division=1)
+
+        logging.info('SUCCESS')
+
+        return precision, recall, fbeta
+
+    except Exception as err:
+        logging.error(err)
 
 
 def inference(model, X):
@@ -103,4 +125,13 @@ def inference(model, X):
     preds : np.array
         Predictions from the model.
     """
-    pass
+    try:
+        logging.info('START')
+
+        pred=model.predict(X)
+
+        logging.info('SUCCESS')
+
+        return pred
+    except Exception as err:
+        logging.error(err)
