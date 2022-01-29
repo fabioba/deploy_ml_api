@@ -33,13 +33,15 @@ def preprocess_step(df):
         y_test(array)
     """
     try:
+
+        df_preprocess=df.copy()
         logger.info('START')
 
         # create dummies vars for categoricals
-        df_preprocess = pd.get_dummies(df, columns =['capital-loss', 'education', 'relationship', 'age', 'native-country', 'workclass', 'capital-gain', 'marital-status', 'hours-per-week', 'fnlgt', 'education-num', 'occupation', 'sex', 'race'])
+        df_preprocess = pd.get_dummies(df_preprocess, columns =['capital-loss', 'education', 'relationship', 'age', 'native-country', 'workclass', 'capital-gain', 'marital-status', 'hours-per-week', 'fnlgt', 'education-num', 'occupation', 'sex', 'race'])
         
         # standardize numericals
-        df[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']]=preprocessing.StandardScaler().fit_transform(df[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']].values)
+        df_preprocess[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']]=preprocessing.StandardScaler().fit_transform(df_preprocess[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']].values)
         # create X and Y
         X=df_preprocess.drop(['salary'],axis=1).values
         df_preprocess.loc[df_preprocess['salary']=='<=50K','salary']=0
@@ -121,13 +123,12 @@ def compute_model_metrics(y, preds):
         logger.error(err)
 
 
-def data_slices_metrics(df,data_slice_list,model):
+def data_slices_metrics(df,model):
     """
         This method calculate the metrics on each data slice (categorical variable)
 
         Args:
             df(pandas DF)
-            data_slice_list(list): list including all the categorical vars to apply slice on
             model(pkl)
     """
     try:
@@ -155,12 +156,6 @@ def data_slices_metrics(df,data_slice_list,model):
                 precision, recall, fbeta=compute_model_metrics(y_test,preds)
 
                 logger.info(f'precision: {precision}, recall: {recall}, fbeta: {fbeta}')
-
-
-
-
-
-
 
 
 
@@ -226,6 +221,8 @@ if __name__=='__main__':
     model=train_model(X_train,y_train)
 
     store_model(model,'model.pkl','./model_trained')
+
+    data_slices_metrics(df,model)
 
 
 
