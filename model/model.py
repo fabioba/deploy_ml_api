@@ -9,9 +9,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import fbeta_score, precision_score, recall_score
 import logging
-import pickle 
-import os
+import pickle
 from sklearn import preprocessing
+from pathlib import Path
 
 
 FORMAT = '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'
@@ -79,7 +79,7 @@ def train_model(X_train, y_train):
     try:
         logger.info('START')
 
-        classifier = LogisticRegression(random_state=0, solver='lbfgs',class_weight='balanced', max_iter=20)
+        classifier = LogisticRegression(solver='lbfgs',class_weight='balanced', max_iter=1000)
         classifier.fit(X_train, y_train)
 
         logger.info('SUCCESS')
@@ -121,6 +121,55 @@ def compute_model_metrics(y, preds):
         logger.error(err)
 
 
+def data_slices_metrics(df,data_slice_list,model):
+    """
+        This method calculate the metrics on each data slice (categorical variable)
+
+        Args:
+            df(pandas DF)
+            data_slice_list(list): list including all the categorical vars to apply slice on
+            model(pkl)
+    """
+    try:
+
+        logger.info('START')
+        
+        data_slice_list=['capital-loss', 'education', 'relationship', 'age', 'native-country', 'workclass', 'capital-gain', 'marital-status', 'hours-per-week', 'fnlgt', 'education-num', 'occupation', 'sex', 'race']
+
+
+        for col in data_slice_list:
+            logger.info(col)
+
+            list_unique=df[col].unique()
+
+            for item in list_unique:
+                logger.info(item)
+
+                df_temp=df[df[col==item]]
+
+                X_train, X_test, y_train, y_test=preprocess_step(df_temp)
+
+                preds=inference(model,X_test)
+
+
+                precision, recall, fbeta=compute_model_metrics(y_test,preds)
+
+                logger.info(f'precision: {precision}, recall: {recall}, fbeta: {fbeta}')
+
+
+
+
+
+
+
+
+
+        logger.info('SUCCESS')
+
+    except Exception as err:
+        logger.error(err)
+
+
 def inference(model, X):
     """ Run model inferences and return the predictions.
 
@@ -157,7 +206,7 @@ def store_model(model,model_name,model_folder):
     try:
         logger.info('START')
 
-        path_file=os.path.join(model_folder,model_name)
+        path_file=str(Path(__file__).parent / 'model_trained' / model_name)
 
         with open(path_file,'wb') as f:
             pickle.dump(model,f)
@@ -176,7 +225,7 @@ if __name__=='__main__':
     
     model=train_model(X_train,y_train)
 
-    store_model(model,'model.pkl','/model_trained')
+    store_model(model,'model.pkl','./model_trained')
 
 
 
