@@ -14,6 +14,9 @@ This model has been evaluated through the following metrics:
 - recall
 - fbeta
 
+The evaluation has been done on the data sliced input dataframe, on each categorical variable.
+
+### 
 Metrics of how the model performs. Include overall performance and also key slices. A figure or two can convey a lot.
 Data including the training and validation data. How it was acquired and processed.
 Bias inherent either in data or model. This could also be included in the metrics or data section.

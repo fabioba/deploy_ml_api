@@ -4,6 +4,7 @@ This module contains model training and pre-processing steps.
 Author: Fabio
 Date: 29th of Jan, 2022
 """
+from importlib.machinery import DEBUG_BYTECODE_SUFFIXES
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -12,16 +13,50 @@ import logging
 import pickle
 from sklearn import preprocessing
 from pathlib import Path
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+
 
 
 FORMAT = '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=FORMAT,level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 def preprocess_step(df):
     """
     Preprocess steps includes getting dummies variables from categorical and split df into train and test set.
+
+    Args:
+        df(Pandas df)
+
+    Output:
+        df(Pandas df)
+    """
+    try:
+
+        df_preprocess=df.copy()
+        logger.info('START')
+
+        # create dummies vars for categoricals
+        #df_preprocess = pd.get_dummies(df_preprocess, columns =['education','marital_status','native_country','occupation','race','relationship','sex','workclass'])
+        
+        # standardize numericals
+        df_preprocess[['capital_loss', 'age', 'hours_per_week', 'fnlgt', 'education_num', 'capital_gain']]=preprocessing.StandardScaler().fit_transform(df_preprocess[['capital_loss', 'age', 'hours_per_week', 'fnlgt', 'education_num', 'capital_gain']].values)
+        df_preprocess.loc[df_preprocess['salary']=='<=50K','salary']=0
+        df_preprocess.loc[df_preprocess['salary']=='>50K','salary']=1
+        df_preprocess['salary']=df_preprocess['salary'].astype('int') 
+
+        logger.info('SUCCESS')
+
+        return df_preprocess
+
+    except Exception as err:
+        logger.error(err)
+
+
+def split_ds(df):
+    """
+    This method splits df
 
     Args:
         df(Pandas df)
@@ -37,41 +72,27 @@ def preprocess_step(df):
         df_preprocess=df.copy()
         logger.info('START')
 
-        # create dummies vars for categoricals
-        df_preprocess = pd.get_dummies(df_preprocess, columns =['education','marital-status','native-country','occupation','race','relationship','sex','workclass'])
-        
-        # standardize numericals
-        df_preprocess[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']]=preprocessing.StandardScaler().fit_transform(df_preprocess[['capital-loss', 'age', 'hours-per-week', 'fnlgt', 'education-num', 'capital-gain']].values)
-        # create X and Y
-        X=df_preprocess.drop(['salary'],axis=1).values
-        df_preprocess.loc[df_preprocess['salary']=='<=50K','salary']=0
-        df_preprocess.loc[df_preprocess['salary']=='>50K','salary']=1
-        y=df_preprocess['salary'].values
 
-        # convert Y type
-        y=y.astype('int')
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+        df_train = df_preprocess.sample(round(len(df_preprocess)*0.8))
+        df_test = df_preprocess.drop(df_train.index)
 
         logger.info('SUCCESS')
 
-
-        return X_train, X_test, y_train, y_test 
+        return df_train, df_test
 
     except Exception as err:
         logger.error(err)
 
 # Optional: implement hyperparameter tuning.
-def train_model(X_train, y_train):
+def train_model(df_train):
     """
     Trains a machine learning model and returns it.
 
     Inputs
     ------
-    X_train : np.array
+    X_train : pandas df
         Training data.
-    y_train : np.array
-        Labels.
     Returns
     -------
     model
@@ -81,8 +102,10 @@ def train_model(X_train, y_train):
     try:
         logger.info('START')
 
-        classifier = LogisticRegression(solver='lbfgs',class_weight='balanced', max_iter=1000)
-        classifier.fit(X_train, y_train)
+        #classifier = LogisticRegression(solver='lbfgs',class_weight='balanced', max_iter=1000)
+        
+        #classifier.fit(X_train, y_train)
+        classifier = smf.glm('salary ~  capital_loss + age + hours_per_week + fnlgt + education_num + capital_gain + C(education) + C(education) + C(marital_status) + C(native_country) + C(occupation) + C(race) + C(relationship) + C(sex) + C(workclass)', family=sm.families.Binomial(), data=df_train).fit()
 
         logger.info('SUCCESS')
 
@@ -135,25 +158,28 @@ def data_slices_metrics(df,model):
 
         logger.info('START')
         
-        data_slice_list=['education','marital-status','native-country','occupation','race','relationship','sex','workclass']
+        data_slice_list=['education','marital_status','native_country','occupation','race','relationship','sex','workclass']
 
 
         for col in data_slice_list:
-            logger.info(col)
+            logger.info('col: {}'.format(col))
 
             list_unique=df[col].unique()
 
             for item in list_unique:
-                logger.info(item)
+                logger.info('item: {}'.format(item))
 
-                df_temp=df[df[col==item]]
+                df_temp=df[df[col]==item]
 
-                X_train, X_test, y_train, y_test=preprocess_step(df_temp)
-
-                preds=inference(model,X_test)
+                df_temp_preprocessed=preprocess_step(df_temp)
 
 
-                precision, recall, fbeta=compute_model_metrics(y_test,preds)
+                preds=inference(model,df_temp_preprocessed)
+
+                y=df_temp_preprocessed.salary.values
+
+
+                precision, recall, fbeta=compute_model_metrics(y,preds)
 
                 logger.info(f'precision: {precision}, recall: {recall}, fbeta: {fbeta}')
 
@@ -201,7 +227,7 @@ def store_model(model,model_name,model_folder):
     try:
         logger.info('START')
 
-        path_file=str(Path(__file__).parent / 'model_trained' / model_name)
+        path_file=str(Path(__file__).parent / model_folder / model_name)
 
         with open(path_file,'wb') as f:
             pickle.dump(model,f)
@@ -216,13 +242,15 @@ if __name__=='__main__':
 
     df=pd.read_csv('./data/census_clean.csv')
 
-    X_train, X_test, y_train, y_test =preprocess_step(df)
+    df_preprocessed =preprocess_step(df)
     
-    model=train_model(X_train,y_train)
+    df_train,df_test=split_ds(df_preprocessed)
 
-    store_model(model,'model.pkl','./model_trained')
+    model=train_model(df_train)
 
-    data_slices_metrics(df,model)
+    store_model(model,'model.pkl','model_trained')
+
+    data_slices_metrics(df_test,model)
 
 
 

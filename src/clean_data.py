@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 def prepare_column_name(df):
     """
-        This method gets a df as input an remove spaces from their columns names
+        This method gets a df as input an remove spaces from their columns names.
+        Replace dash with underscore
 
         Args:
             df(Pandas DF)
@@ -23,6 +24,8 @@ def prepare_column_name(df):
         logger.info('START')
 
         df.columns=[item.replace(' ','') for item in df.columns]
+        df.columns=[item.replace('-','_') for item in df.columns]
+
 
 
         logger.info('SUCCESS')
