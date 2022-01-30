@@ -6,4 +6,4 @@ jobs:
     steps:
       - name: Test functions on GitHub
         run: |
-          python pytest
+          python -m pytest
