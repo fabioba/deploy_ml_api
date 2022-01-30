@@ -11,5 +11,8 @@ setup(
                     'pytest==6.2.5',
                     'statsmodels==0.13.1',
                     'sklearn==0.0',
-                    'dvc==2.9.3'] #external packages as dependencies
+                    'dvc==2.9.3',
+                    'boto3==1.20.24',
+                    's3fs==2022.1.0'
+                    ] #external packages as dependencies
 )
