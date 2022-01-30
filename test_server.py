@@ -9,16 +9,18 @@ client = TestClient(server)
 # Write tests using the same syntax as with the requests module.
 def test_api_locally_get_root():
     r = client.get("/")
-    assert r.status_code == 200
+    assert r.content!=None
 
 def test_run_inference():
-    r=client.get("/inference/10")
+    body={"num_rows":10}
+    r=client.post("/inference",json=body)
     content=r.json()
 
     assert content['preds'] != None
-    assert len(content['preds']) == 10
 
-def test_malformed_url():
-    r=client.get("/inference/hello")
-    
-    assert r!=200
+def test_response_inference():
+    body={"num_rows":10}
+    r=client.post("/inference",json=body)
+    content=r.json()
+
+    assert len(content['preds']) == 20

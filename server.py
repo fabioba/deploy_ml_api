@@ -1,17 +1,24 @@
 from fastapi import FastAPI
 from model import model as model_lib
-app = FastAPI()
 import dvc.api
 import pandas as pd
 import pickle
+from pydantic import BaseModel
+
+class Inference(BaseModel):
+    num_rows: int
+
+app = FastAPI()
+
+
+
 
 @app.get("/")
 def default():
     return {"output":"Hello World!"}
 
-
-@app.get("/inference/{num_rows}")
-async def get_items(num_rows: int):
+@app.post("/inference/")
+async def inference(inf_obj: Inference):
     """
     This method runs inference on a specific number of rows.
     
@@ -31,8 +38,8 @@ async def get_items(num_rows: int):
     with dvc.api.open(
             path='data/census_clean.csv',
             repo='https://github.com/fabioba/deploy_ml_api') as fd:
-            df=pd.read_csv(fd,nrows=num_rows)
+            df=pd.read_csv(fd,nrows=inf_obj.num_rows)
     # run inference
     preds=model_lib.inference(model_trained,df)
 
-    return {"preds": f"{preds}"}
+    return {"preds": f"{preds}, num_rows: {inf_obj.num_rows}"}
