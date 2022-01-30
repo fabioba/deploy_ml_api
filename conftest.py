@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import pytest
+import dvc
 
 @pytest.fixture(scope='session')
 def data():
@@ -10,7 +11,11 @@ def data():
         Output:
             df(pandas DF)
     """
-    df=pd.read_csv(str(Path(__file__).parent / 'data/census_clean.csv'))
 
-    print('read data')
+    with dvc.api.open(
+            path='data/census_clean.csv',
+            repo='https://github.com/fabioba/deploy_ml_api') as fd:
+            df=pd.read_csv(fd)
+
+    print('read data from dvc')
     return df
