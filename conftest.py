@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import pytest
-import dvc
+import dvc.api
 
 @pytest.fixture(scope='session')
 def data():
