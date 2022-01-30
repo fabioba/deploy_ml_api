@@ -19,18 +19,18 @@ def test_numerical_output(data):
 
 def test_census_exist():
     """
-        This test checks if census_clean exists
+        This test checks if census_clean metadata exists
     """
-    my_file = Path(__file__).parent / 'data/census_clean.csv'
+    my_file = Path(__file__).parent / 'data/census_clean.csv.dvc'
 
     assert my_file.is_file(),'file does not exist'
 
 
 def test_model_exist():
     """
-        This test checks model exists
+        This test checks model metadata exists
     """
-    my_file = Path(__file__).parent / 'model/model_trained/model.pkl'
+    my_file = Path(__file__).parent / 'model/model_trained/model.pkl.dvc'
 
     assert my_file.is_file(),'model does not exist'    
 
