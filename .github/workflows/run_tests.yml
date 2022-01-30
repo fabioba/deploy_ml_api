@@ -1,0 +1,9 @@
+name: Test functions
+on: [push]
+jobs:
+  test_functions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test functions on GitHub
+        run: |
+          pytest
