@@ -6,6 +6,12 @@ jobs:
     steps:
       - name: Check Out Code
         uses: actions/checkout@v2
+      - name: set env AWS
+        run: echo "Define ENVs"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.PROD_AWS_REGION }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
