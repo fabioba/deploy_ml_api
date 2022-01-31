@@ -160,7 +160,7 @@ def data_slices_metrics(df,model):
         
         data_slice_list=['education','marital_status','native_country','occupation','race','relationship','sex','workclass']
 
-
+        array_items=[]
         for col in data_slice_list:
             logger.info('col: {}'.format(col))
 
@@ -183,6 +183,12 @@ def data_slices_metrics(df,model):
 
                 logger.info(f'precision: {precision}, recall: {recall}, fbeta: {fbeta}')
 
+                data_temp=[[col,item,precision,recall,fbeta]]
+                array_items=array_items+data_temp
+
+        df_final=pd.DataFrame(data=array_items,columns=[['col','item','precision','recall','fbeta']])
+
+        df_final.to_csv(str(Path(__file__).parent / 'output/data_slice_metrics.csv'))
 
 
         logger.info('SUCCESS')
