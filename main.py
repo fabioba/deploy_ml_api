@@ -4,9 +4,25 @@ import dvc.api
 import pandas as pd
 import pickle
 from pydantic import BaseModel
+from typing import List
+from fastapi.encoders import jsonable_encoder
 
-class Inference(BaseModel):
-    num_rows: int
+class Census(BaseModel):
+    age: int
+    workclass: str
+    fnlgt: int
+    education: str
+    education_num: int
+    marital_status: str
+    occupation: str
+    relationship: str
+    race: str
+    sex: str
+    capital_gain: int
+    capital_loss: int
+    hours_per_week: int
+    native_country: str
+    salary: str
 
 app = FastAPI()
 
@@ -18,7 +34,7 @@ def default():
     return {"output":"Hello World!"}
 
 @app.post("/inference/")
-async def inference(inf_obj: Inference):
+async def inference(list_inf_obj: List[Census]):
     """
     This method runs inference on a specific number of rows.
     
@@ -33,13 +49,13 @@ async def inference(inf_obj: Inference):
         path='model/model_trained/model.pkl',
         repo='https://github.com/fabioba/deploy_ml_api',
         mode='rb'))
+    
+    # convert input data into dataframe
+    df=pd.DataFrame(jsonable_encoder(list_inf_obj))
 
-    # read data
-    with dvc.api.open(
-            path='data/census_clean.csv',
-            repo='https://github.com/fabioba/deploy_ml_api') as fd:
-            df=pd.read_csv(fd,nrows=inf_obj.num_rows)
+    df_preprocessed=model_lib.preprocess_step(df)
+
     # run inference
-    preds=model_lib.inference(model_trained,df)
+    preds=model_lib.inference(model_trained,df_preprocessed)
 
-    return {"preds": preds, "num_rows": inf_obj.num_rows}
+    return {"preds": preds}

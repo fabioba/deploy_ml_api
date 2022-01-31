@@ -105,7 +105,7 @@ def train_model(df_train):
         #classifier = LogisticRegression(solver='lbfgs',class_weight='balanced', max_iter=1000)
         
         #classifier.fit(X_train, y_train)
-        classifier = smf.glm('salary ~  capital_loss + age + hours_per_week + fnlgt + education_num + capital_gain + C(education) + C(education) + C(marital_status) + C(native_country) + C(occupation) + C(race) + C(relationship) + C(sex) + C(workclass)', family=sm.families.Binomial(), data=df_train).fit()
+        classifier = smf.glm('salary ~  capital_loss + age + hours_per_week + fnlgt + education_num + capital_gain + C(education) + C(marital_status) + C(native_country) + C(occupation) + C(race) + C(relationship) + C(sex) + C(workclass)', family=sm.families.Binomial(), data=df_train).fit()
 
         logger.info('SUCCESS')
 

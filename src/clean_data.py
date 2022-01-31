@@ -32,18 +32,20 @@ def prepare_column_name(df):
         logger.error(err)
 
 
-def remove_space_value(df, column_name):
+def remove_space_value(df):
     """
         This method gets a df as input an remove spaces from their values
 
         Args:
             df(Pandas DF)
-            column_name(str): name of the column to remove space from their value
     """
     try:
         logger.info('START')
 
-        df[column_name] = df[column_name].map(lambda x: x.replace(' ', ''))
+        list_cols=list(df.columns)
+
+        for column_name in ['education','marital_status','native_country','occupation','race','relationship','sex','workclass','salary']:
+            df[column_name] = df[column_name].map(lambda x: x.replace(' ', ''))
 
         logger.info('SUCCESS')
     except Exception as err:
@@ -76,7 +78,7 @@ if __name__ == '__main__':
     # remove spaces from columns name
     prepare_column_name(df)
 
-    remove_space_value(df, 'salary')
+    remove_space_value(df)
 
     # store updated df
     store_cleaned_df(df)
