@@ -11,8 +11,25 @@ jobs:
           aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.PROD_AWS_REGION }}
       - uses: iterative/setup-dvc@v1
-  test_functions:
+  flake8_py3:
     needs: configure_aws
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7.4
+          architecture: x64
+      - name: Install flake8
+        run: pip install flake8
+      - name: Run flake8
+        uses: suo/flake8-github-action@releases/v1
+        with:
+          checkName: 'flake8_py3'   # NOTE: this needs to be the same as the job name
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  test_functions:
+    needs: flake8_py3
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Code
