@@ -14,6 +14,7 @@ setup(
                     'dvc==2.9.3',
                     'boto3==1.20.24',
                     's3fs==2022.1.0',
-                    'fastapi==0.73.0'
+                    'fastapi==0.73.0',
+                    'uvicorn==0.17.1'
                     ] #external packages as dependencies
 )
