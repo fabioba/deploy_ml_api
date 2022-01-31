@@ -12,7 +12,7 @@ jobs:
           aws-region: ${{ secrets.PROD_AWS_REGION }}
       - uses: iterative/setup-dvc@v1
   test_functions:
-    needs: [configure_aws,flake8-lint]
+    needs: configure_aws
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Code
