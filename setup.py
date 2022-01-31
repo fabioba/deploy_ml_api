@@ -13,6 +13,7 @@ setup(
                     'sklearn==0.0',
                     'dvc==2.9.3',
                     'boto3==1.20.24',
-                    's3fs==2022.1.0'
+                    's3fs==2022.1.0',
+                    'fastapi==2.0.2'
                     ] #external packages as dependencies
 )
