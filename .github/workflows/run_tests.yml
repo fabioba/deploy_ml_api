@@ -12,8 +12,6 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           ignore: "F401"
-          exclude: "src/EDA.ipynb"
-          max-line-length: "1000"
           path: "src"
   configure_aws:
     needs: flake8_py3
