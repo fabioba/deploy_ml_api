@@ -11,8 +11,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.PROD_AWS_REGION }}
       - uses: iterative/setup-dvc@v1
+  flake8-lint:
+      needs: [configure_aws]
+      runs-on: ubuntu-latest
+      name: Lint
+      steps:
+        - name: Check out source repository
+          uses: actions/checkout@v2
+        - name: Set up Python environment
+          uses: actions/setup-python@v1
+          with:
+            python-version: "3.8"
+        - name: flake8 Lint
+          uses: py-actions/flake8@v2
   test_functions:
-    needs: configure_aws
+    needs: [configure_aws,flake8-lint]
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Code

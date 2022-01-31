@@ -237,12 +237,32 @@ def store_model(model,model_name,model_folder):
     except Exception as err:
         logger.error(err)
 
+def store_pre_processed_data(df):
+    """
+        This method stores pre-processed data
+
+        model(df)
+    """
+    try:
+        logger.info('START')
+
+        path_file=str(Path(__file__).parent.parent / 'data/pre_processed_data.csv')
+
+        df.to_csv(path_file)
+
+    except Exception as err:
+        logger.error(err)
+
+
 if __name__=='__main__':
     logger.info('MAIN')
 
     df=pd.read_csv('./data/census_clean.csv')
 
     df_preprocessed =preprocess_step(df)
+
+    # store pre-processed data
+    store_pre_processed_data(df)
     
     df_train,df_test=split_ds(df_preprocessed)
 
