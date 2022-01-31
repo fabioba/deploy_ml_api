@@ -42,8 +42,9 @@ def remove_space_value(df):
     try:
         logger.info('START')
 
-        list_cols=['education','marital_status','native_country','occupation','race','relationship','sex','workclass','salary']
-
+        list_cols=[
+            'education','marital_status','native_country','occupation','race','relationship','sex','workclass','salary'
+            ]
         for column_name in list_cols:
             df[column_name] = df[column_name].map(lambda x: x.replace(' ',''))
 
