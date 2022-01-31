@@ -1,10 +1,10 @@
 from fastapi.testclient import TestClient
 
 # Import our app from main.py.
-import server
+from main import app
 
 # Instantiate the testing client with our app.
-client = TestClient(server)
+client = TestClient(app)
 
 # Write tests using the same syntax as with the requests module.
 def test_api_locally_get_root():
@@ -18,7 +18,7 @@ def test_api_locally_get_root():
 
 def test_run_inference():
     body={"num_rows":10}
-    r=client.post("/inference",json=body)
+    r=client.post("/inference/",json=body)
     assert r.status_code == 200
 
     content=r.json()
@@ -27,9 +27,9 @@ def test_run_inference():
 
 def test_response_inference():
     body={"num_rows":10}
-    r=client.post("/inference",json=body)
+    r=client.post("/inference/",json=body)
     assert r.status_code == 200
 
     content=r.json()
 
-    assert len(content['preds']) == 20
+    assert content['num_rows'] == 10

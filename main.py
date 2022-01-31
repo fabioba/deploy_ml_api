@@ -42,4 +42,4 @@ async def inference(inf_obj: Inference):
     # run inference
     preds=model_lib.inference(model_trained,df)
 
-    return {"preds": f"{preds}, num_rows: {inf_obj.num_rows}"}
+    return {"preds": preds, "num_rows": inf_obj.num_rows}
