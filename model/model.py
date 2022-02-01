@@ -6,8 +6,6 @@ Date: 29th of Jan, 2022
 """
 from importlib.machinery import DEBUG_BYTECODE_SUFFIXES
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import fbeta_score, precision_score, recall_score
 import logging
 import pickle
@@ -17,12 +15,56 @@ import statsmodels.api as sm
 import statsmodels.formula.api as smf
 import math
 import random
+import sys
+import joblib
+from io import BytesIO
+import dvc.api
+
+sys.modules['sklearn.externals.joblib'] = joblib
+from sklearn.externals.joblib import dump, load
 
 
 FORMAT = '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=FORMAT,level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def preprocess_step_s3(df):
+    """
+    Preprocess steps includes getting dummies variables from categorical and split df into train and test set.
+
+    Args:
+        df(Pandas df)
+
+    Output:
+        df(Pandas df)
+    """
+    try:
+
+        df_preprocess=df.copy()
+        logger.info('START')
+
+        # create dummies vars for categoricals
+        #df_preprocess = pd.get_dummies(df_preprocess, columns =['education','marital_status','native_country','occupation','race','relationship','sex','workclass'])
+        
+        # standardize numericals
+        sc=load(BytesIO(
+            dvc.api.read(
+                    path='model/model_trained/std_scaler.bin',
+                    repo='https://github.com/fabioba/deploy_ml_api',
+                    mode='rb')))
+        df_preprocess[['capital_loss', 'age', 'hours_per_week', 'fnlgt', 'education_num', 'capital_gain']]=sc.fit_transform(df_preprocess[['capital_loss', 'age', 'hours_per_week', 'fnlgt', 'education_num', 'capital_gain']].values)
+                
+        # convert categorical output into numerical
+        df_preprocess.loc[df_preprocess['salary']=='<=50K','salary']=0
+        df_preprocess.loc[df_preprocess['salary']=='>50K','salary']=1
+        df_preprocess['salary']=df_preprocess['salary'].astype('int') 
+
+        logger.info('SUCCESS')
+
+        return df_preprocess
+
+    except Exception as err:
+        logger.error(err)
 def preprocess_step(df):
     """
     Preprocess steps includes getting dummies variables from categorical and split df into train and test set.
@@ -42,7 +84,13 @@ def preprocess_step(df):
         #df_preprocess = pd.get_dummies(df_preprocess, columns =['education','marital_status','native_country','occupation','race','relationship','sex','workclass'])
         
         # standardize numericals
-        df_preprocess[['capital_loss', 'age', 'hours_per_week', 'fnlgt', 'education_num', 'capital_gain']]=preprocessing.StandardScaler().fit_transform(df_preprocess[['capital_loss', 'age', 'hours_per_week', 'fnlgt', 'education_num', 'capital_gain']].values)
+        sc=preprocessing.StandardScaler()
+        df_preprocess[['capital_loss', 'age', 'hours_per_week', 'fnlgt', 'education_num', 'capital_gain']]=sc.fit_transform(df_preprocess[['capital_loss', 'age', 'hours_per_week', 'fnlgt', 'education_num', 'capital_gain']].values)
+        
+        # store standard scaler
+        dump(sc, str(Path(__file__).parent / 'model_trained/std_scaler.bin'), compress=True)
+        
+        # convert categorical output into numerical
         df_preprocess.loc[df_preprocess['salary']=='<=50K','salary']=0
         df_preprocess.loc[df_preprocess['salary']=='>50K','salary']=1
         df_preprocess['salary']=df_preprocess['salary'].astype('int') 
@@ -108,7 +156,10 @@ def split_ds(df):
         df_test=df_test_negative.append(df_test_positive).reset_index(drop=True)
 
         print(df_train.shape)
+        print(df_train.groupby(['salary']).size())
         print(df_test.shape)
+        print(df_test.groupby(['salary']).size())
+
 
 
         logger.info('SUCCESS')
@@ -311,6 +362,10 @@ if __name__=='__main__':
     store_model(model,'model.pkl','model_trained')
 
     data_slices_metrics(df_test,model)
+
+    preds_test=inference(model,df_test)
+    precision, recall, fbeta=compute_model_metrics(df_test['salary'].values,preds=preds_test)
+    logger.info('{} - {} - {}'.format(precision, recall, fbeta))
 
 
 

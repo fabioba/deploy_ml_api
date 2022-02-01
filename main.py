@@ -57,7 +57,7 @@ async def inference(list_inf_obj: Census):
 
     df=pd.DataFrame(item, index=[0])
 
-    df_preprocessed=model_lib.preprocess_step(df)
+    df_preprocessed=model_lib.preprocess_step_s3(df)
 
     # run inference
     preds=model_lib.inference(model_trained,df_preprocessed)
