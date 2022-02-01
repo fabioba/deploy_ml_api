@@ -1,0 +1,4 @@
+outs:
+- md5: ff7f0cf853b332bea6aadccaa78fb024
+  size: 554
+  path: std_scaler.bin
