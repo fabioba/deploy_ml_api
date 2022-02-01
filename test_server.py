@@ -49,7 +49,7 @@ def test_run_inference_negative():
 
 def test_run_inference_positive():
     cens1={"age":31, "workclass":'Private',
-    "fnlgt":47516, "education":'Masters',"education_num":14, "marital_status":'Never-married', "occupation":'Exec-managerial',"relationship":'Not-in-family', "race":'White', "sex":'Female',"capital_gain":14084,"capital_loss":0,"hours_per_week":60, "native_country":'United-States',"salary":'>50K'}
+    "fnlgt":292516, "education":'Masters',"education_num":14, "marital_status":'Divorced', "occupation":'Exec-managerial',"relationship":'Unmarried', "race":'White', "sex":'Female',"capital_gain":14084,"capital_loss":0,"hours_per_week":60, "native_country":'United-States',"salary":'>50K'}
 
     r=client.post("/inference/",json=cens1)
     assert r.status_code == 200

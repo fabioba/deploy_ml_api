@@ -15,7 +15,8 @@ from sklearn import preprocessing
 from pathlib import Path
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-
+import math
+import random
 
 
 FORMAT = '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'
@@ -72,10 +73,43 @@ def split_ds(df):
         df_preprocess=df.copy()
         logger.info('START')
 
+        # get size of the class with the lowest records
+        df_group=df_preprocess.groupby(['salary']).size().reset_index().rename(columns={0:'n_records'})
+        min_size=min(df_group['n_records'].values)
 
+        # create class of df. resampling on that with more records
+        df_salary_positive=df_preprocess[df_preprocess['salary']==1].reset_index(drop=True)
+        df_salary_negative=df_preprocess[df_preprocess['salary']==0].sample(n=min_size).reset_index(drop=True)
+        # concat dfs
+        df_salary_balanced=df_salary_positive.append(df_salary_negative)
 
-        df_train = df_preprocess.sample(round(len(df_preprocess)*0.8))
-        df_test = df_preprocess.drop(df_train.index)
+        # get number of sample per class
+        first_sample_size=math.floor((len(df_salary_balanced)*0.80)/2)
+        # calculate index negative class for train
+        train_sample_negative_index=random.sample(list(df_salary_negative.index),first_sample_size)
+        # calculate index negative class for test
+        test_sample_negative_index=set(list(df_salary_negative.index))-set(train_sample_negative_index)
+        # negative train
+        df_train_negative=df_salary_negative[df_salary_negative.index.isin(train_sample_negative_index)]
+        # negative test
+        df_test_negative=df_salary_negative[df_salary_negative.index.isin(test_sample_negative_index)]
+
+        # calculate index positive class for train
+        train_sample_positive_index=random.sample(list(df_salary_positive.index),first_sample_size)
+        # calculate index positive class for test
+        test_sample_positive_index=set(list(df_salary_positive.index))-set(train_sample_positive_index)
+        # positive train
+        df_train_positive=df_salary_positive[df_salary_positive.index.isin(train_sample_positive_index)]
+        # positive test
+        df_test_positive=df_salary_positive[df_salary_positive.index.isin(test_sample_positive_index)]
+
+        # total df
+        df_train=df_train_negative.append(df_train_positive).reset_index(drop=True)
+        df_test=df_test_negative.append(df_test_positive).reset_index(drop=True)
+
+        print(df_train.shape)
+        print(df_test.shape)
+
 
         logger.info('SUCCESS')
 
