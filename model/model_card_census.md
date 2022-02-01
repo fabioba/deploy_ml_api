@@ -16,6 +16,15 @@ The evaluation has been done on the data sliced input dataframe, on each categor
 
 ## Metrics
 This model has been evaluated through the following metrics:
-- precision 
-- recall
-- fbeta
+- precision: `0.7403127124405167`
+- recall: `0.6940726577437859`
+- fbeta: `0.7164473684210526`
+
+## Ethical Considerations
+The input data contains sensitive information.
+Each person that partecipate to this interview must fulfill all those information.
+One of the variable that could be updated is the gender, since it accepts only two values: `Male` or `Female`. In my view, this constraints does not allow all people to express their gender identity. 
+
+## Caveats and Recommendations
+One of the most relevant suggestions is to include the most values for each categorical variable.
+Moreover, each variable should not be empty.
